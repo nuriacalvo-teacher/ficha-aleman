@@ -752,13 +752,12 @@ function check(){
   $('#btnFlipBack').disabled = false;
 }
 
- function next(){
+function next(){
   if(queue.length === 0){
     status('No hay más fichas.', 'bad');
     return;
   }
 
-  // Si el usuario no contestó, reencolar la carta
   if(!guessEl.value.trim() && !guessEl.disabled){
     const skippedCard = queue[index];
     queue.push(skippedCard);
@@ -778,6 +777,8 @@ function check(){
         roundEl.textContent = rondas;
         rebuildQueue();
         status('Ronda completada. Ahora solo las falladas.', 'ok');
+        // 👇 aseguramos que se muestre la nueva tarjeta e input activo
+        updateCard();
         return;
       } else {
         status('¡Todas correctas! Puedes finalizar o seguir practicando.', 'ok');
@@ -785,8 +786,9 @@ function check(){
     }
   }
 
-  updateCard();
+  updateCard(); // 👈 esto garantiza que siempre se vea la nueva tarjeta
 }
+
 
     function flip(){ cardEl.classList.toggle('flipped'); }
     function rebuildQueue(){

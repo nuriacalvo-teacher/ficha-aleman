@@ -721,72 +721,73 @@
       const answers = (mode === 'de-to-es' ? item.es : [item.de]).map(norm);
       return answers.includes(gNorm);
     }
-    function check(){
-      if(!studentNameEl.value.trim() || !studentSurnameEl.value.trim()){
-        status('Escribe tu nombre y apellido primero.', 'bad');
-        studentNameEl.focus();
-        return;
-      }
-      const item = queue[index];
-      const g = guessEl.value;
-      if(!g){ status('Escribe o di una respuesta primero.', 'bad'); return; }
-      if(isCorrect(g, item)){
-        hits++;
-        hitsEl.textContent = hits;
-        wrongSet.delete(item.de);
-        status('¡Correcto! (+' + CARD_VALUE.toFixed(1) + ')', 'ok');
-      }else{
-        fails++;
-        failsEl.textContent = fails;
-        const wrongMsg = mode === 'de-to-es' 
-          ? `No exactamente. Era: ${item.es[0]} (-${FAIL_PENALTY.toFixed(1)})`
-          : `No exactamente. Era: ${item.de} (-${FAIL_PENALTY.toFixed(1)})`;
-        status(wrongMsg, 'bad');
-        wrongSet.add(item.de);
-      }
-      updateScore();
-      flip();
-      guessEl.disabled = true;
-      $('#btnFlip').disabled = false; // Añade esta línea
-      $('#btnFlipBack').disabled = false; // Añade esta línea
-    }
-    function next(){
+function check(){
+  if(!studentNameEl.value.trim() || !studentSurnameEl.value.trim()){
+    status('Escribe tu nombre y apellido primero.', 'bad');
+    studentNameEl.focus();
+    return;
+  }
+
+  const item = queue[index];
+  const g = guessEl.value.trim();
+  if(!g){ status('Escribe o di una respuesta primero.', 'bad'); return; }
+
+  if(isCorrect(g, item)){
+    hits++;
+    hitsEl.textContent = hits;
+    wrongSet.delete(item.de);
+    status('¡Correcto! (+' + CARD_VALUE.toFixed(1) + ')', 'ok');
+  } else {
+    fails++;
+    failsEl.textContent = fails;
+    const correctAnswers = (mode === 'de-to-es' ? item.es : [item.de]).join(', ');
+    status(`No exactamente. Era: ${correctAnswers} (-${FAIL_PENALTY.toFixed(1)})`, 'bad');
+    wrongSet.add(item.de);
+  }
+
+  updateScore();
+  flip();
+  guessEl.disabled = true;
+  $('#btnFlip').disabled = false;
+  $('#btnFlipBack').disabled = false;
+}
+
+ function next(){
   if(queue.length === 0){
     status('No hay más fichas.', 'bad');
     return;
   }
+
+  // Si el usuario no contestó, reencolar la carta
   if(!guessEl.value.trim() && !guessEl.disabled){
     const skippedCard = queue[index];
     queue.push(skippedCard);
   }
-  index = (index + 1) % queue.length;
-  if(index === 0 && !firstRoundCompleted && !onlyWrong){
-    firstRoundCompleted = true;
-    firstHits = hits;
-    firstFails = fails;
-    if(wrongSet.size > 0){
-      onlyWrong = true;
-      onlyWrongStateEl.textContent = 'on';
-      rondas++;
-      roundEl.textContent = rondas;
-      rebuildQueue();
-      status('Ronda completada. Ahora solo las falladas.', 'ok');
-    } else {
-      status('¡Todas correctas! Puedes finalizar o continuar practicando.', 'ok');
+
+  index++;
+  if(index >= queue.length){
+    index = 0;
+    if(!firstRoundCompleted && !onlyWrong){
+      firstRoundCompleted = true;
+      firstHits = hits;
+      firstFails = fails;
+      if(wrongSet.size > 0){
+        onlyWrong = true;
+        onlyWrongStateEl.textContent = 'on';
+        rondas++;
+        roundEl.textContent = rondas;
+        rebuildQueue();
+        status('Ronda completada. Ahora solo las falladas.', 'ok');
+        return;
+      } else {
+        status('¡Todas correctas! Puedes finalizar o seguir practicando.', 'ok');
+      }
     }
-  } else if(completedSet.size === TOTAL_CARDS && wrongSet.size > 0){
-    onlyWrong = true;
-    onlyWrongStateEl.textContent = 'on';
-    rondas++;
-    roundEl.textContent = rondas;
-    completedSet.clear();
-    rebuildQueue();
-    status(`Ronda ${rondas - 1} completada. Continuando con las falladas.`, 'ok');
-  } else if(completedSet.size === TOTAL_CARDS && wrongSet.size === 0){
-    status('¡Todas correctas! Puedes finalizar o continuar practicando.', 'ok');
   }
+
   updateCard();
 }
+
     function flip(){ cardEl.classList.toggle('flipped'); }
     function rebuildQueue(){
       if(onlyWrong){

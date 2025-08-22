@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
@@ -15,7 +15,7 @@
       --muted:#94a3b8; /* slate-400 */
       --text:#e5e7eb; /* gray-200 */
     }
-    *{box-sizing:border-box} 
+    *{box-sizing:border-box}
     body{
       margin:0;
       min-height:100vh;
@@ -94,7 +94,7 @@
       min-height:100%;
       background:transparent;
       border-radius:20px;
-      margin-top:100px;
+      margin-top:400px;
     }
     .inner{
       position:relative;
@@ -575,7 +575,7 @@
       return minDistance <= Math.ceil(meanings[0].length / 2) ? item.es[meanings.indexOf(closest)] : input;
     }
     // Speech Synthesis
-function speak(text, lang){
+    function speak(text, lang){
   if(!('speechSynthesis' in window)){
     status('Tu navegador no soporta síntesis de voz.', 'bad');
     return;
@@ -750,19 +750,16 @@ function speak(text, lang){
       $('#btnFlip').disabled = false; // Añade esta línea
       $('#btnFlipBack').disabled = false; // Añade esta línea
     }
-   function next(){
+    function next(){
   if(queue.length === 0){
     status('No hay más fichas.', 'bad');
     return;
   }
-  const item = queue[index];
-  if(!guessEl.value.trim() && !guessEl.disabled && !completedSet.has(item.de)){ // Añade !completedSet.has para evitar reinsertar respondidas
-    const skippedCard = queue.splice(index, 1)[0]; // Remueve de la posición actual
-    queue.push(skippedCard); // Reinserta al final
-    index = index % queue.length; // Ajusta el índice después de splice (ya que la cola se acorta)
-  } else {
-    index = (index + 1) % queue.length; // Avanza normal si se respondió o no aplica
+  if(!guessEl.value.trim() && !guessEl.disabled){
+    const skippedCard = queue[index];
+    queue.push(skippedCard);
   }
+  index = (index + 1) % queue.length;
   if(index === 0 && !firstRoundCompleted && !onlyWrong){
     firstRoundCompleted = true;
     firstHits = hits;
